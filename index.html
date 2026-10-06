@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Country Face-Off</title>
+<meta name="description" content="A global data battleground comparing the progress of nations over the last 30 years.">
+<meta name="theme-color" content="#0D1117">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Country Face-Off">
+<meta property="og:description" content="A global data battleground comparing the progress of nations over the last 30 years.">
+<meta property="og:url" content="https://country-face-off.suvadipchakraborty.workers.dev/">
+<meta property="og:image" content="https://country-face-off.suvadipchakraborty.workers.dev/preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Country Face-Off">
+<meta name="twitter:description" content="A global data battleground comparing the progress of nations over the last 30 years.">
+<meta name="twitter:image" content="https://country-face-off.suvadipchakraborty.workers.dev/preview.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main>
+  <section id="arena" class="tab active">
+    <header class="title"><h1>Country <span>Face-Off</span></h1></header>
+
+    <div class="fighters">
+      <label class="fighter p1"><span>Player 1</span><select id="c1" aria-label="Country 1"></select></label>
+      <div class="vs" aria-hidden="true">VS</div>
+      <label class="fighter p2"><span>Player 2</span><select id="c2" aria-label="Country 2"></select></label>
+    </div>
+
+    <div class="pills" id="pills" role="tablist" aria-label="Battle metric"></div>
+
+    <div class="chart-box">
+      <canvas id="chart" aria-label="Line chart comparing the two countries"></canvas>
+      <div id="status" class="status" aria-live="polite">Loading…</div>
+    </div>
+
+    <div class="verdict" id="verdict" hidden>
+      <p id="verdictText"></p>
+      <button id="shareBtn" class="share" aria-label="Share this result">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <section id="about" class="tab">
+    <h2>About</h2>
+    <h3 class="appname">Country Face-Off</h3>
+    <p class="lead">A global data battleground comparing the progress of nations over the last 30 years.</p>
+    <div class="card"><h4>Features</h4><ul>
+      <li>Live historical data fetching</li>
+      <li>Responsive line chart visualizations</li>
+      <li>Direct head-to-head performance verdicts</li></ul></div>
+    <div class="card"><h4>Benefits</h4><p>Helps students, researchers, and data enthusiasts instantly visualize how different economies and societies have evolved compared to their peers.</p></div>
+    <div class="card"><h4>Credits</h4><p>Powered by the open World Bank API.</p></div>
+    <button id="installBtn" class="install">Install App</button>
+    <p id="installHint" class="hint"></p>
+  </section>
+</main>
+
+<nav class="bottom">
+  <button class="navbtn active" data-tab="arena"><span>🥊</span>The Arena</button>
+  <button class="navbtn" data-tab="about"><span>ℹ️</span>About</button>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
