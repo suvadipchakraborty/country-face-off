@@ -3,7 +3,7 @@
 A global data battleground comparing the progress of nations over the last 30 years, using the World Bank API.
 
 - Zero-build: vanilla HTML, CSS, ES6 JS; Chart.js via CDN
-- Metrics: GDP per capita, life expectancy, internet usage (1990-2023)
+- Metrics: 23 World Bank indicators (economy, people & health, technology, environment & energy), 1990-2023, picked from one grouped dropdown so nothing scrolls sideways on phones
 - PWA: installable, service worker caches the app shell (World Bank data is always fetched live)
 - Share: Web Share API on the verdict banner (falls back to clipboard)
 

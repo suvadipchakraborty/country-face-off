@@ -14,9 +14,9 @@ h1 span{color:var(--p2)}
 select{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:10px 8px;font:600 1rem 'Chakra Petch',sans-serif}
 select:focus-visible,button:focus-visible{outline:3px solid #fff;outline-offset:2px}
 .vs{font-size:1.4rem;color:#ffd33d;text-shadow:0 0 12px #ffd33d88}
-.pills{display:flex;gap:8px;overflow-x:auto;margin:16px 0;padding-bottom:4px}
-.pill{flex:1 0 auto;padding:10px 16px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--mute);font:700 .9rem 'Chakra Petch',sans-serif;cursor:pointer;white-space:nowrap}
-.pill.active{color:#0D1117;background:#ffd33d;border-color:#ffd33d}
+.metric{display:flex;flex-direction:column;gap:6px;margin:16px 0;padding:12px;background:var(--panel);border:2px solid #ffd33d;border-radius:10px}
+.metric span{font-size:.75rem;color:#ffd33d;font-weight:700}
+.metric select{text-overflow:ellipsis}
 .chart-box{position:relative;height:340px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
 .status{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:20px;color:var(--mute);background:var(--panel);border-radius:10px}
 .status.hide{display:none}

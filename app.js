@@ -1,9 +1,50 @@
 'use strict';
 const COUNTRIES = {AR:'Argentina',AU:'Australia',BD:'Bangladesh',BR:'Brazil',CA:'Canada',CN:'China',EG:'Egypt',FR:'France',DE:'Germany',GH:'Ghana',GR:'Greece',IN:'India',ID:'Indonesia',IR:'Iran',IL:'Israel',IT:'Italy',JP:'Japan',KE:'Kenya',KR:'South Korea',MX:'Mexico',NL:'Netherlands',NG:'Nigeria',NO:'Norway',PK:'Pakistan',PH:'Philippines',PL:'Poland',RU:'Russia',SA:'Saudi Arabia',SG:'Singapore',ZA:'South Africa',ES:'Spain',SE:'Sweden',CH:'Switzerland',TH:'Thailand',TR:'Turkey',UA:'Ukraine',AE:'United Arab Emirates',GB:'United Kingdom',US:'United States',VN:'Vietnam'};
+const C1 = new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:1});
+const C2 = new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:2});
+const usd = v=>'$'+Math.round(v).toLocaleString('en-US');
+// kinds: usd | usdBig | pct | years | count | num(dec, unit, diffUnit)
+function ind(code, group, better, kind, dec=1, unit='', diffUnit=unit){
+  const o = {code, group, better};
+  switch(kind){
+    case 'usd':    o.fmt = usd; o.diff = usd; o.tick = v=>'$'+C1.format(v); break;
+    case 'usdBig': o.fmt = v=>'$'+C2.format(v); o.diff = o.fmt; o.tick = v=>'$'+C1.format(v); break;
+    case 'pct':    o.fmt = v=>v.toFixed(1)+'%'; o.diff = d=>d.toFixed(1)+' percentage points'; o.tick = v=>C1.format(v)+'%'; break;
+    case 'years':  o.fmt = v=>v.toFixed(1)+' yrs'; o.diff = d=>d.toFixed(1)+' years'; o.tick = v=>C1.format(v); break;
+    case 'count':  o.fmt = v=>C2.format(v); o.diff = o.fmt; o.tick = v=>C1.format(v); break;
+    default:       o.fmt = v=>v.toFixed(dec)+unit; o.diff = d=>d.toFixed(dec)+diffUnit; o.tick = v=>C1.format(v);
+  }
+  return o;
+}
+// better: 'high' = higher wins, 'low' = lower wins, 'neutral' = no "better" side (verdict says who is ahead)
 const INDICATORS = {
-  'GDP per Capita (USD)': {code:'NY.GDP.PCAP.CD', fmt:v=>'$'+Math.round(v).toLocaleString('en-US'), diff:(d)=>'$'+Math.round(d).toLocaleString('en-US')},
-  'Life Expectancy (Years)': {code:'SP.DYN.LE00.IN', fmt:v=>v.toFixed(1)+' yrs', diff:d=>d.toFixed(1)+' years'},
-  'Internet Usage (%)': {code:'IT.NET.USER.ZS', fmt:v=>v.toFixed(1)+'%', diff:d=>d.toFixed(1)+' percentage points'}
+  // Economy (first three keys are kept as-is so old share links still work)
+  'GDP per Capita (USD)':            ind('NY.GDP.PCAP.CD',        'Economy','high','usd'),
+  'GDP per Capita, PPP (Intl $)':    ind('NY.GDP.PCAP.PP.CD',     'Economy','high','usd'),
+  'Total GDP (USD)':                 ind('NY.GDP.MKTP.CD',        'Economy','high','usdBig'),
+  'GDP Growth (%)':                  ind('NY.GDP.MKTP.KD.ZG',     'Economy','high','pct'),
+  'Inflation (%)':                   ind('FP.CPI.TOTL.ZG',        'Economy','low','pct'),
+  'Unemployment (%)':                ind('SL.UEM.TOTL.ZS',        'Economy','low','pct'),
+  'Exports (% of GDP)':              ind('NE.EXP.GNFS.ZS',        'Economy','neutral','pct'),
+  'Military Spending (% of GDP)':    ind('MS.MIL.XPND.GD.ZS',     'Economy','neutral','pct'),
+  // People & Health
+  'Life Expectancy (Years)':         ind('SP.DYN.LE00.IN',        'People & Health','high','years'),
+  'Infant Mortality (per 1,000)':    ind('SP.DYN.IMRT.IN',        'People & Health','low','num',1,'',' deaths per 1,000 births'),
+  'Fertility Rate (births/woman)':   ind('SP.DYN.TFRT.IN',        'People & Health','neutral','num',2,'',' births per woman'),
+  'Population':                      ind('SP.POP.TOTL',           'People & Health','neutral','count'),
+  'Urban Population (%)':            ind('SP.URB.TOTL.IN.ZS',     'People & Health','neutral','pct'),
+  'Health Spending (% of GDP)':      ind('SH.XPD.CHEX.GD.ZS',     'People & Health','neutral','pct'),
+  'Women in Parliament (%)':         ind('SG.GEN.PARL.ZS',        'People & Health','high','pct'),
+  // Technology
+  'Internet Usage (%)':              ind('IT.NET.USER.ZS',        'Technology','high','pct'),
+  'Mobile Subscriptions (per 100)':  ind('IT.CEL.SETS.P2',        'Technology','high','num',0,'',' per 100 people'),
+  'Broadband Subscriptions (per 100)':ind('IT.NET.BBND.P2',       'Technology','high','num',1,'',' per 100 people'),
+  // Environment & Energy
+  'CO2 per Capita (tonnes)':         ind('EN.GHG.CO2.PC.CE.AR5',  'Environment & Energy','low','num',1,' t',' tonnes'),
+  'Renewable Energy (% of use)':     ind('EG.FEC.RNEW.ZS',        'Environment & Energy','high','pct'),
+  'Electricity Access (%)':          ind('EG.ELC.ACCS.ZS',        'Environment & Energy','high','pct'),
+  'Forest Area (% of land)':         ind('AG.LND.FRST.ZS',        'Environment & Energy','high','pct'),
+  'PM2.5 Air Pollution (µg/m³)':     ind('EN.ATM.PM25.MC.M3',     'Environment & Energy','low','num',1,' µg/m³',' µg/m³'),
 };
 const COLORS = {p1:'#2f81ff', p2:'#ff2e6e'};
 const $ = id => document.getElementById(id);
@@ -17,13 +58,11 @@ function init(){
   $('c1').value = COUNTRIES[q.get('a')] ? q.get('a') : 'IN';
   $('c2').value = COUNTRIES[q.get('b')] ? q.get('b') : 'US';
   if (INDICATORS[q.get('m')]) metric = q.get('m');
-  $('pills').innerHTML = Object.keys(INDICATORS).map(k=>`<button class="pill${k===metric?' active':''}" role="tab" data-m="${k}">${k}</button>`).join('');
-  $('pills').addEventListener('click', e=>{
-    const b = e.target.closest('.pill'); if(!b) return;
-    metric = b.dataset.m;
-    document.querySelectorAll('.pill').forEach(p=>p.classList.toggle('active', p===b));
-    battle();
-  });
+  const groups = {};
+  Object.entries(INDICATORS).forEach(([k,v])=>{ (groups[v.group] = groups[v.group] || []).push(k); });
+  $('metric').innerHTML = Object.entries(groups).map(([g,ks])=>`<optgroup label="${g}">${ks.map(k=>`<option value="${k}">${k}</option>`).join('')}</optgroup>`).join('');
+  $('metric').value = metric;
+  $('metric').onchange = ()=>{ metric = $('metric').value; battle(); };
   $('c1').onchange = $('c2').onchange = battle;
   document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>{
     document.querySelectorAll('.navbtn').forEach(x=>x.classList.toggle('active', x===b));
@@ -83,7 +122,7 @@ function drawChart(a, b, s1, s2){
       },
       scales:{
         x:{ticks:{color:'#8b949e', maxTicksLimit:8}, grid:{color:'#21262d'}},
-        y:{ticks:{color:'#8b949e'}, grid:{color:'#21262d'}}
+        y:{ticks:{color:'#8b949e', callback:v=>INDICATORS[metric].tick(v)}, grid:{color:'#21262d'}}
       }
     }
   });
@@ -107,9 +146,19 @@ function verdict(a, b, s1, s2){
   if(v1 === v2){
     html = plain = `In ${y}, ${n1} and ${n2} tied in ${name}!`;
   }else{
-    const w1 = v1 > v2, win = w1?n1:n2, lose = w1?n2:n1, d = I.diff(Math.abs(v1-v2));
-    plain = `In ${y}, ${win} beat ${lose} by ${d} in ${name}!`;
-    html = `In ${y}, <b class="${w1?'w1':'w2'}">${win}</b> beat ${lose} by ${d} in ${name}!`;
+    const hi1 = v1 > v2;                       // is country 1 the higher value?
+    const d = I.diff(Math.abs(v1-v2));
+    const w1 = I.better === 'low' ? !hi1 : hi1; // is country 1 the winner/leader?
+    const win = w1?n1:n2, lose = w1?n2:n1;
+    const cls = w1?'w1':'w2';
+    if(I.better === 'neutral'){
+      plain = `In ${y}, ${win} was ahead of ${lose} by ${d} in ${name}.`;
+      html = `In ${y}, <b class="${cls}">${win}</b> was ahead of ${lose} by ${d} in ${name}.`;
+    }else{
+      const note = I.better === 'low' ? ' (lower is better)' : '';
+      plain = `In ${y}, ${win} beat ${lose} by ${d} in ${name}${note}!`;
+      html = `In ${y}, <b class="${cls}">${win}</b> beat ${lose} by ${d} in ${name}${note}!`;
+    }
   }
   $('verdictText').innerHTML = html;
   shareText = plain; box.hidden = false;
